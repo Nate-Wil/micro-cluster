@@ -1,6 +1,19 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
 resources:
-  - ../base/linkding # This should already be there
-  - ../base/habitica # Add this line
+  - ../base/linkding
+  - ../base/habitica
+
+# Add this section to fix the linkding error
+# It ensures everything from the linkding folder goes into the linkding namespace
+patches:
+  - target:
+      group: apps
+      kind: Deployment
+      name: linkding
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: linkding
 
