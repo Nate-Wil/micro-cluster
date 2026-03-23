@@ -1,0 +1,150 @@
+# MONGODB
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: habitica
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate 
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - kubenode1
+                - lenovonode2
+      securityContext:
+        fsGroup: 999
+      containers:
+      - name: mongo
+        image: mongo:5.0
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+---
+# HABITICA SERVER
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: habitica-server
+  namespace: habitica
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: habitica-server
+  template:
+    metadata:
+      labels:
+        app: habitica-server
+    spec:
+      securityContext:
+        runAsUser: 1000 
+        fsGroup: 1000
+      containers:
+      - name: habitica-server
+        image: habitica/habitica:latest
+        env:
+          - name: MONGO_URL
+            value: "mongodb://mongo:27017/habitica"
+        ports:
+        - containerPort: 3000
+---
+# HABITICA CLIENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: habitica-client
+  namespace: habitica
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: habitica-client
+  template:
+    metadata:
+      labels:
+        app: habitica-client
+    spec:
+      securityContext:
+        runAsUser: 33
+        runAsGroup: 33
+        fsGroup: 33
+      containers:
+      - name: habitica-client
+        image: awinterstein/habitica-client:latest
+        env:
+          - name: BACKEND_SERVER
+            value: "habitica-server:3000"
+        ports:
+        - containerPort: 80
+---
+# SERVICES & INGRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: habitica
+spec:
+  ports:
+    - port: 27017
+  selector:
+    app: mongo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: habitica-server
+  namespace: habitica
+spec:
+  ports:
+    - port: 3000
+  selector:
+    app: habitica-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: habitica-client
+  namespace: habitica
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+  selector:
+    app: habitica-client
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: habitica-ingress
+  namespace: habitica
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: habitica-client
+            port:
+              number: 80
+
