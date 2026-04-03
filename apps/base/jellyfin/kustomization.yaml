@@ -1,0 +1,7 @@
+# apps/base/jellyfin/kustomization.yaml
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - storage.yaml
+  - service.yaml
+

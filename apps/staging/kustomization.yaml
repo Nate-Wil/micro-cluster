@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - ../base/linkding
     #  - ../base/habitica
-
+  - ../base/jellyfin
 # Add this section to fix the linkding error
 # It ensures everything from the linkding folder goes into the linkding namespace
 patches:
@@ -16,4 +16,5 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: linkding
+
 
