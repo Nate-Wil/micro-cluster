@@ -34,36 +34,55 @@ spec:
         ports:
         - containerPort: 27017
         volumeMounts:
-        - name: mongo-data
+        - name: mongo-data-vol
           mountPath: /data/db
+      volumes:
+        - name: mongo-data-vol
+          persistentVolumeClaim:
+            claimName: mongo-data
 ---
 # HABITICA SERVER
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: habitica-server
+  name: habitica-mongo
   namespace: habitica
+  labels:
+    app: habitica-mongo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: habitica-server
+      app: habitica-mongo
   template:
     metadata:
       labels:
-        app: habitica-server
+        app: habitica-mongo
     spec:
-      securityContext:
-        runAsUser: 1000 
-        fsGroup: 1000
       containers:
-      - name: habitica-server
-        image: habitica/habitica:latest
-        env:
-          - name: MONGO_URL
-            value: "mongodb://mongo:27017/habitica"
-        ports:
-        - containerPort: 3000
+        - name: mongo
+          image: mongo:5.0
+          command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+          ports:
+            - containerPort: 27017
+              name: mongo
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+          # Initialize Replica Set for Habitica (required for transactions/oplog)
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/bash
+                  - -c
+                  - |
+                    sleep 10
+                    mongosh --eval "rs.initiate()"
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: local-path
 ---
 # HABITICA CLIENT
 apiVersion: apps/v1

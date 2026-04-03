@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  namespace: jellyfin
+spec:
+  template:
+    spec:
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:latest
+          volumeMounts:
+            - name: media
+              mountPath: /data
+      volumes:
+        - name: media
+          persistentVolumeClaim:
+            claimName: jellyfin-media-pvc
+
