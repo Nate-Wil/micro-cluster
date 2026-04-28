@@ -3,10 +3,8 @@ kind: Kustomization
 
 resources:
   - ../base/linkding
-    #  - ../base/habitica
-    # - ../base/jellyfin
-# Add this section to fix the linkding error
-# It ensures everything from the linkding folder goes into the linkding namespace
+  - ../base/habitica
+  - ../base/jellyfin
 patches:
   - target:
       group: apps
