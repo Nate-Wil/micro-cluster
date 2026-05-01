@@ -4,5 +4,6 @@ resources:
   - namespace.yaml
   - storage.yaml
   - deployment.yaml
+    #  - smb-secret.yaml
 
 
