@@ -16,7 +16,7 @@ spec:
     driver: smb.csi.k8s.io
     volumeHandle: jellyfin-media-share
     volumeAttributes:
-      source: "//192.168.4.143/media"
+      source: "//192.168.4.143/mnt/media"
       #source: "//192.168.5.237/mnt/nas/zzremoteserver"
     nodeStageSecretRef:
       name: smb-creds
