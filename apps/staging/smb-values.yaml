@@ -1,0 +1,4 @@
+#linux:
+#  kubelet: /var/lib/rancher/k3s/agent/kubelet
+linux:
+  kubeletDir: /var/lib/rancher/k3s/agent/kubelet
