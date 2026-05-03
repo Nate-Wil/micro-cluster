@@ -5,7 +5,7 @@ resources:
   - ../base/linkding
     #- ../base/habitica
     #  - ../base/jellyfin
-  - cloudflare
+    #  - cloudflare
 patches:
   - target:
       group: apps
