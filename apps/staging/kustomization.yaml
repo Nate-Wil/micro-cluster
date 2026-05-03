@@ -5,7 +5,7 @@ resources:
   - ../base/linkding
     #- ../base/habitica
     #  - ../base/jellyfin
-  - ../staging/linkding
+  - /linkding
 patches:
   - target:
       group: apps
