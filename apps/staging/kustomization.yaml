@@ -3,9 +3,10 @@ kind: Kustomization
 
 resources:
   #  - ../base/linkding
-    #- ../base/habitica
+  #- ../base/habitica
     #  - ../base/jellyfin
   - linkding
+  - habitica
 patches:
   - target:
       group: apps
