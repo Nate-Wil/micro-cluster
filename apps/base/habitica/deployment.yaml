@@ -123,7 +123,8 @@ spec:
   ports:
     - port: 27017
   selector:
-    app: mongo
+    app: habitica-mongo
+   # app: mongo
 ---
 apiVersion: v1
 kind: Service
