@@ -1,45 +1,45 @@
 # MONGODB
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mongo
-  namespace: habitica
-spec:
-  replicas: 1
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      app: mongo
-  template:
-    metadata:
-      labels:
-        app: mongo
-    spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                - kubenode1
-                - lenovonode2
-      securityContext:
-        fsGroup: 999
-      containers:
-      - name: mongo
-        image: mongo:5.0
-        ports:
-        - containerPort: 27017
-        volumeMounts:
-        - name: mongo-data-vol
-          mountPath: /data/db
-      volumes:
-        - name: mongo-data-vol
-          persistentVolumeClaim:
-            claimName: mongo-data
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: mongo
+#  namespace: habitica
+#spec:
+#  replicas: 1
+#  strategy:
+#    type: Recreate
+#  selector:
+#    matchLabels:
+#      app: mongo
+#  template:
+#    metadata:
+#      labels:
+#        app: mongo
+#    spec:
+#      affinity:
+#        nodeAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#            nodeSelectorTerms:
+#            - matchExpressions:
+#              - key: kubernetes.io/hostname
+#                operator: In
+#                values:
+#                - kubenode1
+#                - lenovonode2
+#      securityContext:
+#        fsGroup: 999
+#      containers:
+#      - name: mongo
+#        image: mongo:5.0
+#        ports:
+#        - containerPort: 27017
+#        volumeMounts:
+#        - name: mongo-data-vol
+#          mountPath: /data/db
+#      volumes:
+#        - name: mongo-data-vol
+#          persistentVolumeClaim:
+#          claimName: mongo-data
 ---
 # HABITICA SERVER
 apiVersion: apps/v1
