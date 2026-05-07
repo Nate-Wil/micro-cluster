@@ -67,7 +67,7 @@ spec:
             - containerPort: 27017
               name: mongo
           volumeMounts:
-            - name: data
+            - name: mongo-data
               mountPath: /data/db
           # Initialize Replica Set for Habitica (required for transactions/oplog)
           lifecycle:
@@ -82,7 +82,7 @@ spec:
       volumes:
         - name: mongo-data
           persistentVolumeClaim:
-            claimName: local-path
+            claimName: mongo-data
 ---
 # HABITICA CLIENT
 apiVersion: apps/v1
