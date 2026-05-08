@@ -42,6 +42,37 @@
 #          claimName: mongo-data
 ---
 # HABITICA SERVER
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: habitica-server
+  namespace: habitica
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: habitica-server
+  template:
+    metadata:
+      labels:
+        app: habitica-server
+    spec:
+      containers:
+        - name: habitica
+          image: habitica/habitica:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: BASE_URL
+              value: "http://localhost:3000"
+
+            - name: NODE_DB_URI
+              value: "mongodb://mongo:27017/habitica"
+
+            - name: PORT
+              value: "3000"
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
