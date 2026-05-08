@@ -65,10 +65,12 @@ spec:
             - containerPort: 3000
           env:
             - name: BASE_URL
-              value: "http://localhost:3000"
+              value: "http://habitica.nametmoto"
 
             - name: NODE_DB_URI
               value: "mongodb://mongo:27017/habitica"
+            - name: ADMIN_EMAIL
+              value: "admin@nametmoto.local"
 
             - name: PORT
               value: "3000"
