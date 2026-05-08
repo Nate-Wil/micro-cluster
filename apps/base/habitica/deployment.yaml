@@ -168,17 +168,33 @@ spec:
   selector:
     app: habitica-server
 ---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: habitica-client
+#  namespace: habitica
+#spec:
+#  type: ClusterIP
+#  ports:
+#    - port: 80
+#  selector:
+#    app: habitica-client
+
 apiVersion: v1
 kind: Service
 metadata:
   name: habitica-client
   namespace: habitica
 spec:
-  type: ClusterIP
-  ports:
-    - port: 80
+  type: NodePort
   selector:
     app: habitica-client
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
