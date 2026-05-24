@@ -111,7 +111,8 @@ spec:
                   - -c
                   - |
                     sleep 10
-                    mongosh --eval "rs.initiate()"
+                    # mongosh --eval "rs.initiate()"
+                    mongosh --eval "try { rs.status() } catch(e) { rs.initiate() }"
       volumes:
         - name: mongo-data
           persistentVolumeClaim:
