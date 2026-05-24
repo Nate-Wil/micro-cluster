@@ -6,7 +6,7 @@ resources:
   #- ../base/habitica
     #  - ../base/jellyfin
   - linkding
-    #  - habitica
+  - habitica
     #  - cloudflared
 patches:
   - target:
