@@ -8,7 +8,7 @@ resources:
   - linkding
   - habitica
     #  - cloudflared
-  - vikunja
+    #  - vikunja
 patches:
   - target:
       group: apps
