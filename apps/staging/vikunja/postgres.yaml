@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vikunja-db
+  namespace: vikunja
+type: Opaque
+stringData:
+  POSTGRES_DB: vikunja
+  POSTGRES_USER: vikunja
+  POSTGRES_PASSWORD: CHANGE_ME
