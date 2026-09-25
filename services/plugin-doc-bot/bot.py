@@ -15,6 +15,7 @@ DISCORD_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 DISCORD_GUILD_ID = int(os.environ["DISCORD_GUILD_ID"])
 GUIDE_CHANNEL_ID = int(os.environ["DISCORD_GUIDE_CHANNEL_ID"])
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini")
 
 openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
@@ -148,15 +149,15 @@ Useful player tips.
 
 ## Important Notes
 
-Anything players should know.
+Anything players should know. Players are not admins, so they will not be working on the server side. Only instructions for non admins should be made for a standard player. When its not clear about admin vs player, generate based on the documentation.
 
 Do not claim anything that isn't supported by the supplied documentation.
 """
+response = await openai_client.responses.create(
+    model=OPENAI_MODEL,
+    input=prompt
+)
 
-    response = await openai_client.responses.create(
-        model="gpt-5",
-        input=prompt
-    )
 
     return response.output_text.strip()
 
@@ -226,7 +227,7 @@ async def plugin(interaction: discord.Interaction, url: str):
         print(f"Generated guide: {len(guide)} characters.")
 
         # Find Discord channel.
-        channel = client.get_channel(GUIDE_CHANNEL_ID)
+        channel = await client.fetch_channel(GUIDE_CHANNEL_ID)
 
         if channel is None:
             raise RuntimeError(
