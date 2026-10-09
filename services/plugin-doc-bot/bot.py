@@ -153,11 +153,10 @@ Anything players should know. Players are not admins, so they will not be workin
 
 Do not claim anything that isn't supported by the supplied documentation.
 """
-response = await openai_client.responses.create(
-    model=OPENAI_MODEL,
-    input=prompt
-)
-
+    response = await openai_client.responses.create(
+        model=OPENAI_MODEL,
+        input=prompt
+    )
 
     return response.output_text.strip()
 
