@@ -7,7 +7,8 @@ resources:
     #  - ../base/jellyfin
   - linkding
   - habitica
-    #  - cloudflared
+  - plugin-doc-bot
+  #  - cloudflared
     #  - vikunja
 patches:
   - target:

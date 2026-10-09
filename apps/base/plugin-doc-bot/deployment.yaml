@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plugin-doc-bot
+  namespace: plugin-doc-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plugin-doc-bot
+  template:
+    metadata:
+      labels:
+        app: plugin-doc-bot
+    spec:
+      containers:
+        - name: plugin-doc-bot
+          image: ghcr.io/nate-wil/plugin-doc-bot:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: plugin-doc-bot-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
