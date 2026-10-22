@@ -8,7 +8,7 @@ resources:
   - linkding
   - habitica
   - plugin-doc-bot
-  - homepage
+    #  - homepage
   #  - cloudflared
     #  - vikunja
 patches:
