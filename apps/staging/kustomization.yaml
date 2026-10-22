@@ -2,15 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  #  - ../base/linkding
-  #- ../base/habitica
-    #  - ../base/jellyfin
   - linkding
   - habitica
   - plugin-doc-bot
-    #  - homepage
+  - homepage
   #  - cloudflared
-    #  - vikunja
+  #  - vikunja
 patches:
   - target:
       group: apps
