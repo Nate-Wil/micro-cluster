@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+data:
+  settings.yaml: |
+    title: "Homelab Homepage"
+    startUrl: "http://homepage.home.arpa"
+    theme: dark
+  services.yaml: |
+    []
+  kubernetes.yaml: |
+    mode: cluster
+    ingress: true
