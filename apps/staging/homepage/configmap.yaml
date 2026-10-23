@@ -8,7 +8,25 @@ data:
     startUrl: "http://homepage.home.arpa"
     theme: dark
   services.yaml: |
-    []
+      services.yaml: |
+    - Infrastructure:
+        - Proxmox:
+            href: https://192.168.4.132:8006
+            description: Virtualization host
+
+        - Rancher:
+            href: http://rancher.local
+            description: Kubernetes management
+
+    - Monitoring:
+        - Grafana:
+            href: http://grafana.local
+            description: Metrics and dashboards
+
+    - Media:
+        - Jellyfin:
+            href: http://192.168.4.153
+            description: Media server
   kubernetes.yaml: |
     mode: cluster
     ingress: true
