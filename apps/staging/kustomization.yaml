@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - linkding
   - habitica
-  - plugin-doc-bot
+    #  - plugin-doc-bot
   - homepage
   #  - cloudflared
   #  - vikunja
