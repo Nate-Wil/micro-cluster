@@ -24,12 +24,23 @@ spec:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: "homepage.home.arpa"
           volumeMounts:
-            - name: config
+            - name: config-workspace
               mountPath: /app/config
+            - name: config-map
+              mountPath: /app/config/settings.yaml
+              subPath: settings.yaml
+            - name: config-map
+              mountPath: /app/config/services.yaml
+              subPath: services.yaml
+            - name: config-map
+              mountPath: /app/config/kubernetes.yaml
+              subPath: kubernetes.yaml
             - name: logs
               mountPath: /app/config/logs
       volumes:
-        - name: config
+        - name: config-workspace
+          emptyDir: {}
+        - name: config-map
           configMap:
             name: homepage-config
         - name: logs
