@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - linkding
   - habitica
+  - bikelog
     #  - plugin-doc-bot
     #  - homepage
   #  - cloudflared

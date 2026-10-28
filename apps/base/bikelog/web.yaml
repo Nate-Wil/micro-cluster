@@ -1,0 +1,52 @@
+# The public face of BikeLog: nginx serving the site, forwarding /api/ to the API
+# and GET requests for /photos/ to photo storage. Point your tunnel or ingress at this Service.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      enableServiceLinks: false
+      imagePullSecrets:
+        - name: ghcr-pull
+      containers:
+        - name: web
+          image: ghcr.io/nate-wil/bikelog/web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: API_UPSTREAM
+              value: http://api:8000
+            - name: S3_UPSTREAM
+              value: http://photos:8333
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: web
+  type: ClusterIP

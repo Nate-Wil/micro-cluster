@@ -1,0 +1,68 @@
+# S3-compatible photo storage (SeaweedFS), the same thing used on the dev machine.
+# No access keys are set, so it runs in "allow all" mode. That is OK only because
+# nothing outside the namespace can reach it: the public site proxies GET requests
+# for /photos/ to it (see web/nginx.conf.template). Add keys before exposing it any other way.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: photos-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: photos
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: photos
+  template:
+    metadata:
+      labels:
+        app: photos
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: seaweedfs
+          # Unpinned, matching what worked on the dev machine. Pin it to a specific
+          # version or digest once you've picked one.
+          image: chrislusf/seaweedfs
+          ports:
+            - containerPort: 8333
+          readinessProbe:
+            tcpSocket:
+              port: 8333
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 768Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: photos-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: photos
+spec:
+  ports:
+    - port: 8333
+  selector:
+    app: photos
+  type: ClusterIP
