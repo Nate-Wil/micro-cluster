@@ -6,3 +6,4 @@ resources:
   - photos.yaml
   - api.yaml
   - web.yaml
+  - backup.yaml

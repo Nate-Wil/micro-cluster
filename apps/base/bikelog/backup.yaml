@@ -1,0 +1,66 @@
+# Nightly Postgres backup. Writes compressed dumps to a volume and keeps 14 days.
+# This is the first layer only: the dumps live on the same cluster as the database, so
+# copy them somewhere off the cluster too (see the walkthrough).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backups-pvc
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-backup
+spec:
+  # 07:00 UTC is 3:00 AM US Eastern (EDT).
+  schedule: "0 7 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          enableServiceLinks: false
+          containers:
+            - name: pg-dump
+              image: postgres:16
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: bikelog-secrets
+                      key: POSTGRES_PASSWORD
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+                  f=/backups/bikelog-$(date -u +%Y-%m-%d-%H%M).sql.gz
+                  pg_dump -h db -U bikelog bikelog | gzip > "$f.tmp"
+                  mv "$f.tmp" "$f"
+                  find /backups -name 'bikelog-*.sql.gz' -mtime +14 -delete
+                  echo "Backup written:"
+                  ls -lh /backups
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              volumeMounts:
+                - name: backups
+                  mountPath: /backups
+          volumes:
+            - name: backups
+              persistentVolumeClaim:
+                claimName: backups-pvc

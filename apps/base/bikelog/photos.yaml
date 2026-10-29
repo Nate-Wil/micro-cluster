@@ -6,6 +6,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: photos-data-pvc
+  annotations:
+    # Flux will never delete this when the app is removed from git. Delete it by hand if you mean to.
+    kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   accessModes:
     - ReadWriteOnce
