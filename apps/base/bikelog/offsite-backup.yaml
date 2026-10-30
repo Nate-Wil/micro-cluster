@@ -1,0 +1,110 @@
+# Nightly copy of BikeLog's data to an SMB share on the NAS.
+#   1. An init container dumps the database into a scratch folder.
+#   2. rclone copies that dump, and every photo (read over the photo store's S3 API), to the NAS.
+# It needs no access to the data volumes, so it can run on any node.
+# Credentials come from the "nas-backup" Secret, created by hand (NOT stored in git).
+# Copies only: nothing is ever deleted from the NAS except database dumps older than 30 days.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nas-backup
+spec:
+  # 07:30 UTC is 3:30 AM US Eastern (EDT), after the local backup at 3:00.
+  schedule: "30 7 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          enableServiceLinks: false
+          volumes:
+            - name: scratch
+              emptyDir: {}
+          initContainers:
+            - name: dump
+              image: postgres:16
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: bikelog-secrets
+                      key: POSTGRES_PASSWORD
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+                  pg_dump -h db -U bikelog bikelog | gzip > /scratch/bikelog-$(date -u +%Y-%m-%d-%H%M).sql.gz
+                  ls -lh /scratch
+              volumeMounts:
+                - name: scratch
+                  mountPath: /scratch
+          containers:
+            - name: rclone
+              # Unpinned; pin to a specific version once you've seen it work.
+              image: rclone/rclone:latest
+              env:
+                # The NAS, as an rclone "remote" named NAS.
+                - name: RCLONE_CONFIG_NAS_TYPE
+                  value: smb
+                - name: RCLONE_CONFIG_NAS_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: nas-backup
+                      key: SMB_HOST
+                - name: RCLONE_CONFIG_NAS_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: nas-backup
+                      key: SMB_USER
+                - name: SMB_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: nas-backup
+                      key: SMB_PASS
+                - name: SMB_SHARE
+                  valueFrom:
+                    secretKeyRef:
+                      name: nas-backup
+                      key: SMB_SHARE
+                # The photo store, as an rclone "remote" named PHOTOS (anonymous, in-cluster only).
+                - name: RCLONE_CONFIG_PHOTOS_TYPE
+                  value: s3
+                - name: RCLONE_CONFIG_PHOTOS_PROVIDER
+                  value: Other
+                - name: RCLONE_CONFIG_PHOTOS_ENDPOINT
+                  value: http://photos:8333
+                - name: RCLONE_CONFIG_PHOTOS_ENV_AUTH
+                  value: "false"
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  # rclone wants the SMB password in its own "obscured" form.
+                  export RCLONE_CONFIG_NAS_PASS="$(rclone obscure "$SMB_PASS")"
+                  DEST="NAS:${SMB_SHARE}/bikelog"
+
+                  echo "== Database dump =="
+                  rclone copy /scratch "$DEST/db" -v
+                  rclone delete "$DEST/db" --min-age 30d -v
+
+                  echo "== Photos =="
+                  rclone copy PHOTOS:bikelog-photos "$DEST/photos" -v
+
+                  echo "== On the NAS now =="
+                  rclone ls "$DEST/db" | tail -5
+                  echo "photos: $(rclone size "$DEST/photos" | tr '\n' ' ')"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 256Mi
+              volumeMounts:
+                - name: scratch
+                  mountPath: /scratch
