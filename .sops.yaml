@@ -1,0 +1,6 @@
+creation_rules:
+  - path_regex: ^apps/.*\.enc\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    age: >-
+      age14m6clpaqxftd4lqf0vj6euhg6qu0xn3m3mnpp2z6q2af3y436fqqxqj0mu
+      age122z4py4g9fu33qp7364wt8rhwrkk3zer4nh75q634fsynzn2yscqtq9hv3
